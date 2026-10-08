@@ -1,0 +1,22 @@
+{
+  "name": "field-coach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI coach for face-to-face sales meetings: record, transcribe (Hebrew), score, and send tips on WhatsApp",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "zod": "^4.6.5"
+  }
+}

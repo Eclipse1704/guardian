@@ -1,0 +1,11 @@
+{
+  "name": "מאמן השטח — ניתוח פגישות מכירה",
+  "short_name": "מאמן השטח",
+  "start_url": "/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#f6f7fb",
+  "theme_color": "#4338ca",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

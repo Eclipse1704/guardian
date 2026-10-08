@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>מאמן השטח</title>
+  <meta name="description" content="מקליטים את פגישת המכירה, מקבלים ציון וטיפים לוואטסאפ">
+  <meta name="theme-color" content="#4338ca">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="brand"><img src="/icon.svg" alt="" width="28" height="28"> מאמן השטח</a>
+    <select id="who" aria-label="מי אני"></select>
+  </header>
+  <div id="banner" class="banner" hidden></div>
+  <main id="view" tabindex="-1"></main>
+  <nav class="tabs">
+    <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>פגישות</a>
+    <a href="#/record" data-tab="record" class="rec-tab"><span class="rec-dot"></span>הקלטה</a>
+    <a href="#/dashboard" data-tab="dashboard"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>מנהל</a>
+    <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>הגדרות</a>
+  </nav>
+  <div id="pocket" class="pocket" hidden>
+    <div class="pocket-inner">
+      <div class="pocket-dot"></div>
+      <div id="pocket-time">00:00</div>
+      <p>מקליט · אפשר לשים בכיס</p>
+      <small>הקישו פעמיים ליציאה</small>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
