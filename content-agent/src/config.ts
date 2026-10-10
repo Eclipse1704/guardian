@@ -15,6 +15,10 @@ export const config = {
   model: optional("CLAUDE_MODEL", "claude-opus-5-5"),
   outputDir: path.resolve(optional("OUTPUT_DIR", "output")),
   dataDir: path.resolve(optional("DATA_DIR", "data")),
+  // Brand profile injected into every content job; empty string disables it.
+  brandFile: optional("BRAND_FILE", "brand/gan-eden-hai.md"),
+  // Public base URL of this server, used to build links to generated sites.
+  publicUrl: optional("PUBLIC_URL", "").replace(/\/+$/, ""),
   higgsfield: {
     baseUrl: optional("HF_BASE_URL", "https://api.higgsfield.ai"),
     model: optional("HF_IMAGE_MODEL", "higgsfield-ai/soul/v2/standard"),

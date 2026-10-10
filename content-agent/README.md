@@ -9,6 +9,10 @@
 | 3. תמונות מוצר | צילומי מוצר, באנרים, קריאייטיב לרשתות | Higgsfield API, הכלי `generate_product_image` |
 | 4. דוח יומי לווטסאפ | סיכום של כל העדכונים מהפלטפורמה ב-24 השעות האחרונות | WhatsApp Cloud API + cron |
 
+הסוכן מותאם ל-**gan-eden-hai.com** ("הרגע הזה"): פרופיל המותג שלו, כלומר הצבעים, הגופנים והטון,
+נמצא ב-`brand/gan-eden-hai.md` ונטען לכל משימה. אפשר להחליף אותו דרך `BRAND_FILE`.
+הוראות החיבור של האתר לסוכן נמצאות ב-[INTEGRATION.md](INTEGRATION.md).
+
 כל הקבצים נשמרים ב-`output/<שם-הפרויקט>/` (קובצי HTML ו-MD, ותמונות בתיקייה `images/`).
 
 ## התקנה
@@ -46,10 +50,12 @@ npm run server
 |---|---|
 | `POST /events` | הפלטפורמה שולחת כל עדכון: `{"type":"sale","title":"מכירה חדשה","details":{...}}` |
 | `POST /agent` | מריץ משימת תוכן: `{"request":"..."}` |
+| `POST /business-card` | בונה ברקע כרטיס ביקור דיגיטלי לחבר/ת מועדון ומחזיר מיד `url` |
+| `GET /sites/<project>/` | הדפים שנוצרו, פתוחים לציבור, בלי אימות |
 | `POST /digest` | שולח את הדוח היומי עכשיו (לבדיקה) |
 | `GET /health` | בדיקת חיים, בלי אימות |
 
-כל קריאה, חוץ מ-`/health`, חייבת לכלול את הכותרת `x-webhook-secret: <EVENTS_WEBHOOK_SECRET>`.
+כל קריאה, חוץ מ-`/health` ו-`/sites`, חייבת לכלול את הכותרת `x-webhook-secret: <EVENTS_WEBHOOK_SECRET>`.
 
 דוגמה לחיבור מהפלטפורמה (או מ-Zapier/Make/webhook של חנות):
 ```bash

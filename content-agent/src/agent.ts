@@ -1,4 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
+import fs from "node:fs";
+import path from "node:path";
 import { config } from "./config.js";
 import { saveAssetTool } from "./tools/files.js";
 import { generateProductImageTool } from "./tools/images.js";
@@ -37,8 +39,21 @@ are missing (price, contact details, brand colors), make a sensible choice, mark
 placeholder, and list what the owner should fill in. Finish with a short summary in the \
 request's language: the files you created and what still needs the owner's input.`;
 
+function loadBrand(): string {
+  if (!config.brandFile) return "";
+  const brand = fs.readFileSync(path.resolve(config.brandFile), "utf8");
+  return (
+    "Unless the request names another brand, all content is for the platform described in " +
+    "this brand profile: follow its voice and visual identity.\n\n" + brand
+  );
+}
+
+const brand = loadBrand();
+
 export async function runAgent(request: string): Promise<string> {
   const client = new Anthropic();
+  const system: Anthropic.Beta.BetaTextBlockParam[] = [{ type: "text", text: SYSTEM_PROMPT }];
+  if (brand) system.push({ type: "text", text: brand });
 
   const runner = client.beta.messages.toolRunner({
     model: config.model,
@@ -47,7 +62,7 @@ export async function runAgent(request: string): Promise<string> {
     // On a policy refusal, the API retries on a fallback model it chooses.
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system: SYSTEM_PROMPT,
+    system,
     tools: [saveAssetTool, generateProductImageTool],
     messages: [{ role: "user", content: request }],
     max_iterations: 40,

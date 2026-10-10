@@ -1,10 +1,13 @@
 import http from "node:http";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { timingSafeEqual } from "node:crypto";
 import cron from "node-cron";
 import { config, required } from "./config.js";
 import { recordEvent } from "./events.js";
 import { runAgent } from "./agent.js";
 import { sendDailyDigest } from "./digest.js";
+import { buildBusinessCard, cardProject, siteUrl, type CardRequest } from "./cards.js";
 
 const secret = required("EVENTS_WEBHOOK_SECRET");
 
@@ -20,6 +23,29 @@ async function readJson(req: http.IncomingMessage): Promise<Record<string, unkno
   return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
 }
 
+const MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".md": "text/markdown; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
+
+/** Serves generated sites publicly under /sites/<project>/<file>. */
+async function serveSite(urlPath: string, res: http.ServerResponse) {
+  const rel = decodeURIComponent(urlPath.replace(/^\/sites\//, "").split("?")[0]);
+  const file = path.resolve(config.outputDir, rel.endsWith("/") ? rel + "index.html" : rel);
+  if (!file.startsWith(config.outputDir + path.sep)) return send(res, 404, { error: "not found" });
+  try {
+    const body = await fs.readFile(file);
+    res.writeHead(200, { "Content-Type": MIME[path.extname(file)] ?? "application/octet-stream" });
+    res.end(body);
+  } catch {
+    send(res, 404, { error: "not found" });
+  }
+}
+
 function send(res: http.ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(body));
@@ -28,6 +54,7 @@ function send(res: http.ServerResponse, status: number, body: unknown) {
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === "GET" && req.url === "/health") return send(res, 200, { ok: true });
+    if (req.method === "GET" && req.url?.startsWith("/sites/")) return serveSite(req.url, res);
     if (!authorized(req)) return send(res, 401, { error: "unauthorized" });
 
     // Your platform posts every update here; they are included in the daily WhatsApp digest.
@@ -50,6 +77,34 @@ const server = http.createServer(async (req, res) => {
       const body = await readJson(req);
       if (typeof body.request !== "string") return send(res, 400, { error: "missing 'request'" });
       return send(res, 200, { summary: await runAgent(body.request) });
+    }
+
+    // A Creators Club member built a business card: generate the site in the background.
+    if (req.method === "POST" && req.url === "/business-card") {
+      const card = (await readJson(req)) as unknown as CardRequest;
+      if (typeof card.name !== "string" || !card.name.trim()) {
+        return send(res, 400, { error: "missing 'name'" });
+      }
+      const url = siteUrl(cardProject(card));
+      buildBusinessCard(card)
+        .then(() =>
+          recordEvent({
+            type: "business_card_ready",
+            title: `כרטיס הביקור של ${card.name} מוכן`,
+            details: { url, memberId: card.memberId },
+            source: "content-agent",
+          }),
+        )
+        .catch((err) =>
+          recordEvent({
+            type: "agent_error",
+            title: `יצירת כרטיס הביקור של ${card.name} נכשלה`,
+            details: { error: (err as Error).message, memberId: card.memberId },
+            source: "content-agent",
+          }),
+        )
+        .catch((err) => console.error("Recording business-card result failed:", err));
+      return send(res, 202, { status: "building", url });
     }
 
     if (req.method === "POST" && req.url === "/digest") {
